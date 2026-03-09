@@ -16,8 +16,10 @@ namespace TankGame
         private static readonly Random _rng = new Random();
 
         // Счётчик тиков до следующей смены направления
-        private int _dirChangeCooldown = 40;
-        private const int DirChangeCooldownMax = 40;
+        private int _dirChangeCooldown = 0;
+        private const int DirChangeCooldownMax = 60;
+        // Максимальная дальность видимости врага в клетках
+        private const int MaxSightRange = 8;
 
         // moveCooldownMax = 6 чтобы враги двигались медленнее игрока
         // (Direction)_rng.Next(4) = случайное начальное направление
@@ -25,11 +27,7 @@ namespace TankGame
         // , shootCooldownMax: 20 - кд выстрела
         public EnemyTank(int row, int col) : base(row, col, (Direction)_rng.Next(4), moveCooldownMax: 40, shootCooldownMax: 80)
         {
-            {
-                {
-
-                }
-            }
+            _shootCooldown = ShootCooldownMax;
         }
 
         protected override bool IsPlayerBullet() => false;
@@ -67,6 +65,11 @@ namespace TankGame
             }
 
             if (targetDir == null) return null;
+
+            
+            // проверка дальности
+            int distance = Math.Abs(player.Row - Row) + Math.Abs(player.Col - Col);
+            if (distance > MaxSightRange) return null; // слишком далеко — не стреляем
 
             // нет ли стен на пути
             if (IsLineOfSightClear(Row, Col, player.Row, player.Col, map))
@@ -123,7 +126,7 @@ namespace TankGame
             if (!moved)
             {
                 Dir = (Direction)_rng.Next(4);
-                _dirChangeCooldown = DirChangeCooldownMax;
+                _dirChangeCooldown = DirChangeCooldownMax/2;
             }
         }
     }
