@@ -115,6 +115,9 @@ namespace TankGame
         {
             if (_cells[row, col].Type != CellType.Wall) return false;
 
+            // если стена неразрушаемая то не наносим урон и выходим
+            if (_cells[row, col].IsIndestructible) return false;
+
             _cells[row, col].Hp--;
 
             if (_cells[row, col].Hp <= 0)

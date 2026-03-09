@@ -199,6 +199,9 @@ namespace TankGame
                 Bullet b = _bullets[i];
                 if (!b.IsAlive) continue;
 
+                // проверка коллизии до движения для выстрела в упор
+                if (CheckBulletHit(b, allTanks)) continue;
+
                 b.Move();
 
                 if (b.Row < 0 || b.Row >= _map.Height || b.Col < 0 || b.Col >= _map.Width)
@@ -214,31 +217,40 @@ namespace TankGame
                     continue;
                 }
 
-                foreach (Tank tank in allTanks)
-                {
-                    if (!tank.IsAlive) continue;
-                    if (tank.Row != b.Row || tank.Col != b.Col) continue;
-
-                    bool hitPlayer = b.IsPlayerBullet == false && tank is PlayerTank;
-                    bool hitEnemy = b.IsPlayerBullet == true && tank is EnemyTank;
-
-                    if (hitPlayer)
-                    {
-                        ((PlayerTank)tank).TakePlayerDamage();
-                        b.IsAlive = false;
-                        break;
-                    }
-                    if (hitEnemy)
-                    {
-                        tank.TakeDamage();
-                        b.IsAlive = false;
-                        _score += 100; // за каждого убитого врага +100 очков
-                        break;
-                    }
-                }
+                // Проверка попадания в танки после движения
+                CheckBulletHit(b, allTanks);
             }
 
             _bullets.RemoveAll(b => !b.IsAlive);
+        }
+
+        // Вспомогательный метод проверки попадания пули в танк на текущей позиции
+        // Возвращает true если попадание произошло
+        private bool CheckBulletHit(Bullet b, List<Tank> allTanks)
+        {
+            foreach (Tank tank in allTanks)
+            {
+                if (!tank.IsAlive) continue;
+                if (tank.Row != b.Row || tank.Col != b.Col) continue;
+
+                bool hitPlayer = b.IsPlayerBullet == false && tank is PlayerTank;
+                bool hitEnemy = b.IsPlayerBullet == true && tank is EnemyTank;
+
+                if (hitPlayer)
+                {
+                    ((PlayerTank)tank).TakePlayerDamage();
+                    b.IsAlive = false;
+                    return true;
+                }
+                if (hitEnemy)
+                {
+                    tank.TakeDamage();
+                    b.IsAlive = false;
+                    _score += 100; // за каждого убитого врага +100 очков
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

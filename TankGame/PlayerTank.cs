@@ -21,7 +21,7 @@ namespace TankGame
         private const int InvincibleDuration = 40; // 40 тиков неуязвимости
 
         // moveCooldownMax = 3 для того чтобы игрок двигался быстрее врагов
-        public PlayerTank(int row, int col) : base(row, col, Direction.Up, moveCooldownMax: 1)
+        public PlayerTank(int row, int col) : base(row, col, Direction.Up, moveCooldownMax: 0)
         {
             Lives = 3;          // старт с 3 жизнями
             _startRow = row;
