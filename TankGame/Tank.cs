@@ -32,19 +32,20 @@ namespace TankGame
 
         // КД выстрела
         protected int _shootCooldown = 0;
-        protected const int ShootCooldownMax = 5; // 5 тиков между выстрелами
+        protected readonly int ShootCooldownMax; // 5 тиков между выстрелами
 
         // КД движения
         protected int _moveCooldown = 0;
         protected int _moveCooldownMax;
 
-        protected Tank(int row, int col, Direction dir, int moveCooldownMax)
+        protected Tank(int row, int col, Direction dir, int moveCooldownMax, int shootCooldownMax = 5)
         {
             Row = row;
             Col = col;
             Dir = dir;
             IsAlive = true;
             _moveCooldownMax = moveCooldownMax;
+            ShootCooldownMax = shootCooldownMax;
         }
 
         // Метод TryMove пытается сдвинуться в направлении dir

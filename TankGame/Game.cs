@@ -1,8 +1,8 @@
-﻿using System;
+﻿// Game.cs — ПОЛНЫЙ ОБНОВЛЁННЫЙ ФАЙЛ
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace TankGame
 {
@@ -43,17 +43,19 @@ namespace TankGame
 
                 if (result == GameResult.Victory)
                 {
+                    _renderer.DrawAll(_map, _player, _enemies, _bullets, _level, _score);
                     _renderer.DrawMessage($"  Уровень {_level} пройден!", ConsoleColor.Green);
                     Thread.Sleep(2000); // 2 секунды перед следующим уровнем
                     _level++;
                 }
                 else if (result == GameResult.Defeat)
                 {
+                    _renderer.DrawAll(_map, _player, _enemies, _bullets, _level, _score);
                     _renderer.DrawMessage("  Проигрыш. Нажмите любую кнопку  ", ConsoleColor.Red);
                     Console.ReadKey(true);
                     _isRunning = false;
                 }
-                else // Quit
+                else
                 {
                     _isRunning = false;
                 }
@@ -61,7 +63,7 @@ namespace TankGame
 
             _renderer.Clear();
             Console.CursorVisible = true;
-            Console.WriteLine($"Thanks for playing! Final score: {_score}");
+            Console.WriteLine($"Спасибо за игру! Счёт: {_score}");
         }
 
         private enum GameResult { Victory, Defeat, Quit }
@@ -83,7 +85,18 @@ namespace TankGame
                     char ch = mapLines[row][col];
                     if (ch == 'P')
                     {
-                        _player = new PlayerTank(row, col);
+                        // если игрок уже существует то сохраняем его жизни. Если первый уровень — создаём нового.
+                        if (_player == null)
+                        {
+                            _player = new PlayerTank(row, col);
+                        }
+                        else
+                        {
+                            // Перемещаем игрока на стартовую позицию нового уровня и сохраняем количество жизней
+                            int savedLives = _player.Lives;
+                            _player = new PlayerTank(row, col);
+                            _player.SetLives(savedLives);
+                        }
                     }
                     else if (ch == 'E')
                     {
@@ -91,6 +104,9 @@ namespace TankGame
                     }
                 }
             }
+
+            if (_player == null)
+                _player = new PlayerTank(1, 1);
 
             // Доббавление доп врагов по мере возростания уровня
             int extraEnemies = Math.Min(level - 1, 4);
@@ -150,6 +166,9 @@ namespace TankGame
 
                 _player.UpdateCooldowns();
 
+                // обновляем таймер неуязвимости каждый тик
+                _player.UpdateInvincibility();
+
                 foreach (EnemyTank enemy in _enemies)
                 {
                     Bullet? enemyBullet = enemy.Update(_player, _map, allTanks);
@@ -203,11 +222,17 @@ namespace TankGame
                     bool hitPlayer = b.IsPlayerBullet == false && tank is PlayerTank;
                     bool hitEnemy = b.IsPlayerBullet == true && tank is EnemyTank;
 
-                    if (hitPlayer || hitEnemy)
+                    if (hitPlayer)
+                    {
+                        ((PlayerTank)tank).TakePlayerDamage();
+                        b.IsAlive = false;
+                        break;
+                    }
+                    if (hitEnemy)
                     {
                         tank.TakeDamage();
                         b.IsAlive = false;
-                        if (hitEnemy) _score += 100; // за каждого убитого врага +100 очков
+                        _score += 100; // за каждого убитого врага +100 очков
                         break;
                     }
                 }

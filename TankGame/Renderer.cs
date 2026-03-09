@@ -36,7 +36,17 @@ namespace TankGame
                 DrawAt(player.Row, player.Col, player.DisplayChar, ConsoleColor.Green);
 
             // HUD
-            DrawHUD(level, score, enemies);
+            DrawHUD(level, score, enemies, player.Lives);
+
+            // мигание игрока при неуязвимости
+            if (player.IsAlive)
+            {
+                bool showPlayer = !player.IsInvincible || (Environment.TickCount / 200) % 2 == 0;
+                if (showPlayer)
+                    DrawAt(player.Row, player.Col, player.DisplayChar, ConsoleColor.Green);
+                else
+                    DrawAt(player.Row, player.Col, ' ', ConsoleColor.Black);
+            }
         }
 
         // поклеточная отрисровка карты
@@ -80,19 +90,21 @@ namespace TankGame
         }
 
         // HUD
-        private void DrawHUD(int level, int score, List<EnemyTank> enemies)
+        private void DrawHUD(int level, int score, List<EnemyTank> enemies, int lives)
         {
             Console.SetCursorPosition(0, 0);
             Console.ForegroundColor = ConsoleColor.White;
 
-            // Счёт живых врагов
+            //Счётчик живых врагов
             int aliveEnemies = 0;
             foreach (EnemyTank e in enemies)
             {
                 if (e.IsAlive) aliveEnemies++;
             }
 
-            Console.Write($"  Уровень: {level}   Счёт: {score}   Враги: {aliveEnemies}   Управление: Стрелочки=Движение  Пробел=Выстрел  Q=Выход  ");
+            string livesDisplay = new string('o', lives);
+
+            Console.Write($"  Уровень:{level}  Счёт:{score}  Враги:{aliveEnemies}  Жизни:{livesDisplay}  Управление: Стрелочки=Движение  Пробел=Выстрел  Q=Выход  ");
             Console.ResetColor();
         }
 

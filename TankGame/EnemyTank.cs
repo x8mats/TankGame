@@ -16,13 +16,15 @@ namespace TankGame
         private static readonly Random _rng = new Random();
 
         // Счётчик тиков до следующей смены направления
-        private int _dirChangeCooldown = 0;
-        private const int DirChangeCooldownMax = 8;
+        private int _dirChangeCooldown = 40;
+        private const int DirChangeCooldownMax = 40;
 
         // moveCooldownMax = 6 чтобы враги двигались медленнее игрока
         // (Direction)_rng.Next(4) = случайное начальное направление
         // Next(4) = 0,1,2,3 джля Direction
-        public EnemyTank(int row, int col) : base(row, col, (Direction)_rng.Next(4), moveCooldownMax: 12){
+        // , shootCooldownMax: 20 - кд выстрела
+        public EnemyTank(int row, int col) : base(row, col, (Direction)_rng.Next(4), moveCooldownMax: 40, shootCooldownMax: 80)
+        {
             {
                 {
 

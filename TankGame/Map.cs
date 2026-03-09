@@ -19,6 +19,8 @@ namespace TankGame
         public CellType Type;     // тип клетки
         public int Hp;            // количество хп у стены (0 = разрушена)
         public char DisplayChar;  // символ для отрисовки
+        
+        public bool IsIndestructible; //неразрушаемая клетка (края карты)
     }
 
     public class Map
@@ -29,6 +31,8 @@ namespace TankGame
         public int Height { get; private set; }
 
         private const int WallMaxHp = 3; // стена выдерживает 3 попадания
+
+        private const int IndestructibleHp = -1; // хп для неразрушаемых стен 
 
         public Map(string[] mapLines)
         {
@@ -46,21 +50,43 @@ namespace TankGame
                 for (int col = 0; col < Width; col++)
                 {
                     char ch = col < mapLines[row].Length ? mapLines[row][col] : ' ';
-                    _cells[row, col] = ParseCell(ch);
+
+                    // является ли клетка граничной
+                    bool isEdge = row == 0 || row == Height - 1 || col == 0 || col == Width - 1;
+
+                    _cells[row, col] = ParseCell(ch, isEdge);
                 }
             }
         }
 
-        private Cell ParseCell(char ch)
+        private Cell ParseCell(char ch, bool isEdge)
         {
             switch (ch)
             {
                 case '#':
-                    return new Cell { Type = CellType.Wall, Hp = WallMaxHp, DisplayChar = '#' };
+                    // Если это граничная клетка то неразрушаемма
+                    if (isEdge)
+                    {
+                        return new Cell
+                        {
+                            Type = CellType.Wall,
+                            Hp = IndestructibleHp,    // -1  бессмертная
+                            DisplayChar = '#',
+                            IsIndestructible = true
+                        };
+                    }
+                    // Обычная стена разрушаемая
+                    return new Cell
+                    {
+                        Type = CellType.Wall,
+                        Hp = WallMaxHp,
+                        DisplayChar = '#',
+                        IsIndestructible = false
+                    };
                 case '~':
-                    return new Cell { Type = CellType.Water, Hp = 0, DisplayChar = '~' };
+                    return new Cell { Type = CellType.Water, Hp = 0, DisplayChar = '~', IsIndestructible = false };
                 default:
-                    return new Cell { Type = CellType.Empty, Hp = 0, DisplayChar = ' ' };
+                    return new Cell { Type = CellType.Empty, Hp = 0, DisplayChar = ' ', IsIndestructible = false };
             }
         }
 
