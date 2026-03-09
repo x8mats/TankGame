@@ -22,6 +22,8 @@ namespace TankGame
         // видел ли враг игрока в прошлом тике
         private bool _playerWasVisible = false;
 
+        private bool _isAiming = false;
+
         // moveCooldownMax = 6 чтобы враги двигались медленнее игрока
         // (Direction)_rng.Next(4) = случайное начальное направление
         // Next(4) = 0,1,2,3 джля Direction
@@ -44,7 +46,11 @@ namespace TankGame
             if (shot != null) return shot;
 
             // Движение
-            MoveAI(map, allTanks);
+            // Враг замирает пока видит игрока и ждёт таймер перед выстрелом
+            if (!_isAiming)
+            {
+                MoveAI(map, allTanks);
+            }
 
             return null;
         }
@@ -68,6 +74,7 @@ namespace TankGame
                 // Когда снова окажется на линии отсчёт начнётся заново.
                 _playerWasVisible = false;
                 _spotCooldown = 0;
+                _isAiming = false;
                 return null;
             }
 
@@ -77,6 +84,7 @@ namespace TankGame
             {
                 _playerWasVisible = false;
                 _spotCooldown = 0;
+                _isAiming = false;
                 return null;
             }
 
@@ -86,6 +94,7 @@ namespace TankGame
                 // Стена перекрыла обзор — сбрасываем прицел
                 _playerWasVisible = false;
                 _spotCooldown = 0;
+                _isAiming = false;
                 return null;
             }
 
@@ -97,6 +106,7 @@ namespace TankGame
                 // Запускаем таймер прицеливания и выстрела нет
                 _playerWasVisible = true;
                 _spotCooldown = SpotCooldownMax;
+                _isAiming = true; // замораживаем движение и начали прицеливаться
                 return null; // не стреляем, только прицеливаемся
             }
 
@@ -107,7 +117,14 @@ namespace TankGame
                 return null; // не стреляем
             }
 
-            return Shoot();
+            // Выстрел, после выстрела сбрасываем _isAiming чтобы враг снова начал двигаться
+            Bullet? result = Shoot();
+            if (result != null)
+            {
+                // выстрел произведён — сбрасываем прицел, враг возобновляет движение.
+                _isAiming = false;
+            }
+            return result;
         }
 
         // Проверка прямой видимости между двумя точками, идём от (r1,c1) к (r2,c2) и проверяем IsBulletPassable
