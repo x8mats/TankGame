@@ -202,6 +202,14 @@ namespace TankGame
                 // проверка коллизии до движения для выстрела в упор
                 if (CheckBulletHit(b, allTanks)) continue;
 
+                // проверка стены до движения для выстрела в упор к стене
+                if (!_map.IsBulletPassable(b.Row, b.Col))
+                {
+                    _map.DamageWall(b.Row, b.Col);
+                    b.IsAlive = false;
+                    continue;
+                }
+
                 b.Move();
 
                 if (b.Row < 0 || b.Row >= _map.Height || b.Col < 0 || b.Col >= _map.Width)

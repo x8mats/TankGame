@@ -17,7 +17,7 @@ namespace TankGame
         private int _spotCooldown = 0;
 
         // Сколько тиков враг прицеливается перед первым выстрелом.
-        private const int SpotCooldownMax = 10;
+        private const int SpotCooldownMax = 5;
 
         // видел ли враг игрока в прошлом тике
         private bool _playerWasVisible = false;
@@ -28,7 +28,7 @@ namespace TankGame
         // (Direction)_rng.Next(4) = случайное начальное направление
         // Next(4) = 0,1,2,3 джля Direction
         // shootCooldownMax кд выстрела
-        public EnemyTank(int row, int col) : base(row, col, (Direction)_rng.Next(4), moveCooldownMax: 40, shootCooldownMax: 80)
+        public EnemyTank(int row, int col) : base(row, col, (Direction)_rng.Next(4), moveCooldownMax: 40, shootCooldownMax: 50)
         {
             _shootCooldown = ShootCooldownMax;
         }
@@ -107,6 +107,7 @@ namespace TankGame
                 _playerWasVisible = true;
                 _spotCooldown = SpotCooldownMax;
                 _isAiming = true; // замораживаем движение и начали прицеливаться
+                _shootCooldown = 0;
                 return null; // не стреляем, только прицеливаемся
             }
 
