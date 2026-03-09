@@ -19,7 +19,7 @@ namespace TankGame
         private bool _isRunning;
 
         // Задержка тика в миллисекундах
-        private const int TickMs = 80;
+        private const int TickMs = 100;
 
         public Game()
         {
